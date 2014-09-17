@@ -158,5 +158,5 @@ If you want to use *both* a database *and* Redis, you can.
 .. _swizzard: https://github.com/swizzard
 .. _WTFPL: http://www.wtfpl.net/
 .. |dealwithit| image:: http://i.giphy.com/qrwthQPPQrtEk.gif
-                        :height: 40px
-                        :width: 40px
+                        :height: 5px
+                        :width: 5px
