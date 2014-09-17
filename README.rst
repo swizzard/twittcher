@@ -7,6 +7,8 @@ It's simple, small (currently ~150 lines of code), and doesn't require any regis
 
 Twittcher is an open-source software originally written by Zulko_, and released under the MIT licence. The project is hosted on Github_, where you can report bugs, propose improvements, etc.
 
+This particular fork was made by swizzard_. He likes the WTFPL_ license, but is keeping things MIT out of respect for the original project.
+
 Install
 --------
 
@@ -129,8 +131,25 @@ A bot can save to a file the tweets that it has already seen, so that in future 
     bot = SearchWatcher("chocolate milk", database="choco.db")
     bot.watch_every(20)
 
+Or you can use Redis_, with either a url
+::
+    from twittcher import UserWatcher
+    bot = UserWatcher("cnnbrk", redis_url="redis://...")
+    bot.watch_every(20)
+
+Or a config dictionary
+::
+    import environ
+    from twittcher import UserWatcher
+    bot = UserWatcher("wigu", redis_settings={"host": "localhost", "port": 7000, "db": 1,
+                                              "password": environ.get("REDIS_PASSWORD")})
+    bot.watch_every(20)
+
 
 
 .. _PyPI: https://pypi.python.org/pypi/twittcher
 .. _Zulko : https://github.com/Zulko
 .. _Github: https://github.com/Zulko/twittcher
+.. _Redis: http://redis.io/
+.. _swizzard: https://github.com/swizzard
+.. _WTFPL: http://www.wtfpl.net/
