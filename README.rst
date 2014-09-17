@@ -145,7 +145,7 @@ or a config dictionary
                                               "password": environ.get("REDIS_PASSWORD")})
     bot.watch_every(20)
 
-but not both, because that wouldn't make any sense, so it'll raise an error. |dealwithit|
+but not both, because that wouldn't make any sense, so it'll raise an error.
 
 If you want to use *both* a database *and* Redis, you can.
 
@@ -157,6 +157,3 @@ If you want to use *both* a database *and* Redis, you can.
 .. _Redis: http://redis.io/
 .. _swizzard: https://github.com/swizzard
 .. _WTFPL: http://www.wtfpl.net/
-.. |dealwithit| image:: http://i.giphy.com/qrwthQPPQrtEk.gif
-                        :height: 5px
-                        :width: 5px
