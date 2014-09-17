@@ -29,10 +29,10 @@ class Tweet(object):
         return self.link == other.link
 
     def __str__(self):
-        return ("\n".join(["%(text)s",
-                           "  Author: %(username)s",
-                           "  Date: %(date)s",
-                           "  Link: %(link)s"])%self.__dict__)
+        return "{text}\nAuthor: {uname}\nDate: {date}\nLink: {link}".format(text=self.text,
+                                                                            uname=self.username,
+                                                                            date=self.date,
+                                                                            link=self.link)
 
 
 class PageWatcher(object):
@@ -69,7 +69,6 @@ class PageWatcher(object):
             return redis.StrictRedis(**settings_dict)
         else:
             return None
-
     def get_new_tweets(self):
         """ Go watch the page, return all new tweets. """
 
