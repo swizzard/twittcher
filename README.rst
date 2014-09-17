@@ -137,13 +137,17 @@ Or you can use Redis_, with either a url
     bot = UserWatcher("cnnbrk", redis_url="redis://...")
     bot.watch_every(20)
 
-Or a config dictionary
+or a config dictionary
 ::
     import environ
     from twittcher import UserWatcher
     bot = UserWatcher("wigu", redis_settings={"host": "localhost", "port": 7000, "db": 1,
                                               "password": environ.get("REDIS_PASSWORD")})
     bot.watch_every(20)
+
+but not both, because that wouldn't make any sense, so it'll raise an error. |dealwithit|
+
+If you want to use *both* a database *and* Redis, you can.
 
 
 
@@ -153,3 +157,6 @@ Or a config dictionary
 .. _Redis: http://redis.io/
 .. _swizzard: https://github.com/swizzard
 .. _WTFPL: http://www.wtfpl.net/
+.. |dealwithit| .. image:: http://i.giphy.com/qrwthQPPQrtEk.gif
+                           :height: 40px
+                           :width: 40px
