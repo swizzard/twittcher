@@ -6,8 +6,10 @@ import pickle
 from urllib import urlopen
 import smtplib
 from bs4 import BeautifulSoup
+import redis
 
-class Tweet:
+
+class Tweet(object):
     """ A class to make tweets from HTML data.
     
     Finds tweet.text, tweet.username, tweet.date, tweet.link
@@ -33,20 +35,41 @@ class Tweet:
                            "  Link: %(link)s"])%self.__dict__)
 
 
-class PageWatcher:
+class PageWatcher(object):
     """ General class for (username/search) page watchers """
     
-    def __init__(self, action, database=None):
+    def __init__(self, action, database=None, redis_url=None, redis_settings=None):
         
         self.action = action
         self.database = database
+        self.redis = self.config_redis(redis_url, redis_settings)
+        self.seen_tweets = []
         
-        if (database is not None) and os.path.exists(database):
+        if (self.database is not None) and os.path.exists(self.database):
             with open(database, 'r') as f:
-                self.seen_tweets = pickle.load(f)
+                self.seen_tweets += pickle.load(f)
+        if self.redis is not None:
+            if hasattr(self, "username"):
+                self.redis_key = self.username
+            elif hasattr(self, "search_term"):
+                self.redis_key = self.search_term
+            else:
+                self.redis_key = "tweets"
+            cached = self.redis.lrange(self.redis_key, 0, -1)
+            if isinstance(cached, list):
+                self.seen_tweets += cached
+
+    @staticmethod
+    def config_redis(url=None, settings_dict=None):
+        if url and settings_dict:
+            raise ValueError("Can't have both url and settings_dict")
+        elif url:
+            return redis.from_url(url)
+        elif settings_dict:
+            return redis.StrictRedis(**settings_dict)
         else:
-            self.seen_tweets = []
-            
+            return None
+
 
     def get_new_tweets(self):
         """ Go watch the page, return all new tweets. """
@@ -72,6 +95,8 @@ class PageWatcher:
             with open(self.database, "w+") as f:
                 pickle.dump(self.seen_tweets, f,
                             protocol = pickle.HIGHEST_PROTOCOL)
+        if self.redis is not None:
+            self.redis.lpush(self.redis_key, *new_tweets)
         
         return new_tweets
 
@@ -85,7 +110,6 @@ class PageWatcher:
         while True:
             self.watch()
             time.sleep(seconds)
-
 
 
 class UserWatcher(PageWatcher):
@@ -105,7 +129,6 @@ class UserWatcher(PageWatcher):
         self.username = username
         self.p_class = "ProfileTweet-text" 
         self.a_class = "ProfileTweet-timestamp"
-
 
 
 class SearchWatcher(PageWatcher):
@@ -129,8 +152,7 @@ class SearchWatcher(PageWatcher):
         self.a_class = "tweet-timestamp"
 
 
-
-class TweetSender:
+class TweetSender(object):
     """ A class to make it easy to send tweets per email.
 
     Examples:
@@ -157,13 +179,11 @@ class TweetSender:
         self.from_addrs = from_addrs
         self.sender_id = sender_id
 
-
     def make_message(self, tweet):
         return ("\n".join(["From: <%(from_addrs)s>",
                            "To: <%(to_addrs)s>",
                            "Subject: Twittcher[ %(sender_id)s ]: New tweet !",
-                           "", str(tweet)]))%(self.__dict__)
-
+                           "", str(tweet)])) % self.__dict__
 
     def send(self, tweet):
         self.server.sendmail(self.from_addrs, self.to_addrs,
