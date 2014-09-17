@@ -70,7 +70,6 @@ class PageWatcher(object):
         else:
             return None
 
-
     def get_new_tweets(self):
         """ Go watch the page, return all new tweets. """
 
@@ -94,7 +93,7 @@ class PageWatcher(object):
         if self.database is not None:
             with open(self.database, "w+") as f:
                 pickle.dump(self.seen_tweets, f,
-                            protocol = pickle.HIGHEST_PROTOCOL)
+                            protocol=pickle.HIGHEST_PROTOCOL)
         if self.redis is not None:
             self.redis.lpush(self.redis_key, *new_tweets)
         
@@ -123,10 +122,10 @@ class UserWatcher(PageWatcher):
     >>> bot.watch_every(120)
     """
 
-    def __init__(self, username, action=print, database=None):
-        PageWatcher.__init__(self, action, database)
-        self.url = "https://twitter.com/"+username
+    def __init__(self, username, action=print, database=None, redis_url=None, redis_settings=None):
+        super(UserWatcher, self).__init__(action, database, redis_url, redis_settings)
         self.username = username
+        self.url = "https://twitter.com/" + self.username
         self.p_class = "ProfileTweet-text" 
         self.a_class = "ProfileTweet-timestamp"
 
@@ -144,10 +143,10 @@ class SearchWatcher(PageWatcher):
     
     """
     
-    def __init__(self, search_term, action=print, database=None):
-        PageWatcher.__init__(self, action, database)
-        self.url ="https://twitter.com/search?f=realtime&q="+search_term
+    def __init__(self, search_term, action=print, database=None, redis_url=None, redis_settings=None):
+        super(SearchWatcher, self).__init__(action, database, redis_url, redis_settings)
         self.search_term = search_term
+        self.url ="https://twitter.com/search?f=realtime&q=" + self.search_term
         self.p_class = "tweet-text"
         self.a_class = "tweet-timestamp"
 
